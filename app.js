@@ -13,8 +13,10 @@ class App{
 
     this._setupCamera();
     this._setupLight();
+    this._loadTexture();
     this._setupModel();
     this._setupControls();
+    this._changeScene();
 
     window.onresize = this.resize.bind(this);
     this.resize();
@@ -26,116 +28,132 @@ class App{
     const width = this._divContainer.clientWidth;
     const height = this._divContainer.clientHeight;
     const camera = new THREE.PerspectiveCamera(
-      75,
+      100,
       width / height,
       0.1,
-      100
+      1000
     );
-    camera.position.z = 7;
+    camera.position.z = 10;
     this._camera = camera;
+    this._scene.add(camera);
   }
-
+s
   _setupLight() {
-    const color = [0xfadf69, 0x0aafff];
-    const intensity = 2;
+    const color = [0xB6DFF3, 0xF5CECF];
+    const intensity = 1;
     const light = new THREE.DirectionalLight(color[0], intensity);
-    light.position.set(-1, 2, 4);
-    this._scene.add(light);
+    const light2 = new THREE.DirectionalLight(color[2], intensity);
+    light.position.set(-2, 3, 4);
+    light2.position.set(2, -2, -2);
+    this._camera.add(light);
+    this._camera.add(light2);
   }
 
   _setupControls() {
     new THREE.OrbitControls(this._camera, this._divContainer);
   }
 
-  // _setupModel() {
-  //   const vertics = [];
-  //   for (let i = 0; i < 10000; i++){
-  //     const x = THREE.Math.randFloatSpread(8);
-  //     const y = THREE.Math.randFloatSpread(8);
-  //     const z = THREE.Math.randFloatSpread(8);
+  _loadTexture() {
+    const textureLoader = new THREE.TextureLoader();
 
-  //     vertics.push(x, y, z);
-  //   }
+    const iceMap = textureLoader.load("./images/Blue_Ice_001_COLOR.jpg");
+    const iceAO = textureLoader.load("./images/Blue_Ice_001_OCC.jpg");
+    const iceNormal = textureLoader.load("./images/Blue_Ice_001_NORM.jpg");
+    const iceRough = textureLoader.load("./images/Blue_Ice_001_ROUGH.jpg");
+    const iceDisp = textureLoader.load("./images/Blue_Ice_001_DISP.png");
 
-  //   const geometry = new THREE.BufferGeometry();
-  //   geometry.setAttribute(
-  //     "position",
-  //     new THREE.Float32BufferAttribute(vertics, 3)
-  //   );
+    const fabricMap = textureLoader.load("./images/Fabric_Alcantara_001_basecolor.jpg");
+    const fabricAO = textureLoader.load("./images/Fabric_Alcantara_001_ambientOcclusion.jpg");
+    const fabricNormal = textureLoader.load("./images/Fabric_Alcantara_001_normal.jpg");
+    const fabricRough = textureLoader.load("./images/Fabric_Alcantara_001_roughness.jpg");
+    const fabricDisp = textureLoader.load("./images/Fabric_Alcantara_001_height.png");
 
-  //   const sprite = new THREE.TextureLoader().load("../examples/textures/sprites/ball.png")
+    const BGMap = textureLoader.load("./images/background.jpg");
 
-  //   const material = new THREE.PointsMaterial({
-  //     map: sprite,
-  //     alphaTest: 1, //해당 값보다 클때만 렌더링
-  //     color: 0x00ffff,
-  //     size: 0.1,
-  //     sizeAttenuation: true //원근감에 따른 크기변화 유무
-  //   });
+    const iceMaterial = new THREE.MeshStandardMaterial({
+      map: iceMap,
+      normalMap: iceNormal,
 
-  //   const points = new THREE.Points(geometry, material);
-  //   this._scene.add(points);
-  // }
+      aoMap: iceAO,
+      aoMapIntensity: 5,
 
-  // _setupModel() {
-  //   const vertices = [
-  //     -1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0];
-    
-  //   const geometry = new THREE.BufferGeometry();
-  //   geometry.setAttribute("position", new THREE.Float32Attribute(vertices, 3));
+      displacementMap: iceDisp,
+      displacementScale: 0.1,
+      // displacementBias: -,
 
-  //   const material = new THREE.LineDashedMaterial({
-  //     color: 0x00ffff,
-  //     dashSize: 0.2, //그려지는 선 길이
-  //     gapSize: 0.1, //선 사이 간격
-  //     scale: 1 //대쉬 영역 표현 배수
-  //   })
+      roughnessMap: iceRough,
+      roughness: 0.5,
+    });
 
-  //   const line = new THREE.Line(geometry, material);
-  //   line.computeLineDistances();//데쉬 라인으로 하려면 꼭 넣어야 함
-  //   this._scene.add(line);
-  // }
+    const fabricMaterial = new THREE.MeshStandardMaterial({
+      map: fabricMap,
+      normalMap: fabricNormal,
 
-  _setupModel() {
-    // 메쉬 베이직 매테리얼 - 광원에 영향을 받지 않음
-    // const material = new THREE.MeshBasicMaterial({
-    //   visible: true, //보일지 안보일지 정함
-    //   transparent: true, //opacity값 사용 여부
-    //   opacity: 0.5, //0 ~ 1까지 값, transparent를 true값으로 정해야지 사용 가능
-    //   depthTest: false, //렌더링 되는 메쉬에 픽셀 위치의 z값을 depthBuffer 값을 이용해검사할지에 대한 여부
-    //   depthWrite: false, //렌더링 되는 메쉬에 픽셀 위치의 z값을 depthBuffer값에 저장할 것인지 여부
-    //   side: THREE.FrontSide, //렌더링 할 면 선택
-    //   color: 0xffffff,
-    //   wireframe: false
-    // });
+      aoMap: fabricAO,
+      aoMapIntensity: 1,
 
-    // const material = new THREE.MeshLambertMaterial({
-    //   transparent: true,
-    //   opacity: 0.5,
-    //   side:THREE.DoubleSide,
-    //   color: 0x00ffff, //재질 색상 값
-    //   emissive: 0x0000, //광원에 영향을 받지 않는 재질 자체에서 방출하는 색상 값
-    //   wireframe:false
-    // })
+      displacementMap: fabricDisp,
+      displacementScale: 0.05,
+      displacementBias: -0.019,
 
-    //메쉬퐁매테리얼 -> 메쉬가 렌더링 되는 픽셀 단위로 광원에 영향을 계산하는 재질
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x00ffff, //재질의 색상 값
-      emissive: 0x0000, //다른 광원에 영향을 받지 않는 재질 자체에서 방출하는 색상값
-      specular: 0xff0000, //광원에 의해서 반사되는 색상
-      shininess: 10, //specular 강도
-      flatShading: true, //메쉬를 평평하게 렌더링 할지 여부
-      wireframe:false
+      roughnessMap: fabricRough,
+      roughness: 0.9
+    });
+
+    const BGMaterial = new THREE.MeshBasicMaterial({
+      map: BGMap,
+      side: THREE.BackSide
     })
 
-    const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-    box.position.set(-1, 0, 0);
-    this._scene.add(box);
-
-    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.6,32,32), material);
-    sphere.position.set(1, 0, 0);
-    this._scene.add(sphere);
+    this._iceMaterial = iceMaterial;
+    this._fabricMaterial = fabricMaterial;
+    this._BGMaterial = BGMaterial;
   }
+
+  _setupModel() {
+    const group = new THREE.Object3D();
+    this._scene.add(group);
+
+    const radius = 4;
+    const widthSegments = 150;
+    const heightSegments = 150;
+
+    const backgroundBox = new THREE.SphereGeometry(200,30,30);
+    const background = new THREE.Mesh(backgroundBox, this._BGMaterial);
+    group.add(background);
+
+    const sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+    const iceSphere = new THREE.Mesh(sphereGeometry, this._iceMaterial);
+
+    const boxGeometry = new THREE.BoxBufferGeometry(5, 5, 5, widthSegments, heightSegments);
+    const iceBox = new THREE.Mesh(boxGeometry, this._fabricMaterial);
+
+
+    const model = [iceSphere, iceBox];
+    group.add(model[0]);
+    this._group = group;
+    this._model = model;
+  }
+
+  _changeScene() {
+    const changeScenebtn = document.querySelector("button");
+    let currentModel = changeScenebtn.value;
+    changeScenebtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentModel === "box") {
+        this._group.remove(this._model[0]);    
+        this._group.add(this._model[1]);
+        currentModel = "sphere";
+      } else if (currentModel === "sphere") {
+        this._group.remove(this._model[1]);      
+        this._group.add(this._model[0]);
+        currentModel = "box";
+    }
+    });
+  }
+
+  //버튼을 눌렀을 때 신이 변경 되어야 함
+  //
 
   resize() {
     const width = this._divContainer.clientWidth;
@@ -154,7 +172,7 @@ class App{
   }
 
   update(time) {
-    time *= 0.001 //second unit
+    time *= 0.001; //second unit
   }
 }
 
